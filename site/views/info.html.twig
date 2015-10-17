@@ -1,0 +1,146 @@
+
+{% extends "layout.html.twig" %}
+
+{% block extrascript %}
+    <script src="//autobahn.s3.amazonaws.com/js/autobahn.min.js"></script>
+    <script type="text/javascript">
+        var bitcore = require('bitcore');
+        var Transaction = bitcore.Transaction;
+        $(document).ready(function() {
+
+            console.log("{% autoescape false %}{{  bitcoinUrl }}{% endautoescape %}");
+
+            $('#qrcode').qrcode({
+                'text': "{% autoescape false %}{{  bitcoinUrl }}{% endautoescape %}"
+            });
+
+            add_row = function (tx) {
+                console.log(tx);
+
+                    var queue = '<div class="panel panel-default">';
+                    queue += '  <div class="panel-heading">';
+                    queue += '      <h4 class="panel-title">';
+                    queue += '          <a data-toggle="collapse" data-parent="queues-accordion" href="collapse1">' + $('#queuename').val() + '</a>';
+                    queue += '          </a>';
+                    queue += '      </h4>';
+                    queue += '  </div>';
+                    queue += '  <div id="collapse1" class="panel-collapse collapse in">';
+                    queue += '      <div class="panel-body">';
+                    $.each(tx.outputs, function (key, value) {
+                        queue += '<div class="col-md-12">';
+                        queue += 'Output';
+                        queue += '</div>';
+
+                    });
+                    queue += ' </div>';
+                    queue += '  </div>';
+                    queue += '</div>';
+                    $('#queues-accordion').append(queue);
+
+            };
+
+            var conn = new ab.Session('ws://localhost:8080',
+                function() {
+                    //2ab2320fe62fcafeb6933c48585ceae37df548df6dc11a16aaa091ea4778496b
+                    conn.subscribe('{{ request.slug }}', function(topic, data) {
+                        data = $.parseJSON(data);
+                        // This is where you would add the new article to the DOM (beyond the scope of this tutorial)
+                        console.log('New article published to category "' + topic + '" : ' + data.title);
+
+                        if (data.title == "test.tx") {
+                            add_row(data.tx);
+                        }
+
+                        if (data.title == 'tx.complete') {
+                            add_row(data.tx)
+                        }
+                    });
+                },
+                function() {
+                    console.warn('WebSocket connection closed');
+                },
+                {'skipSubprotocolCheck': true}
+            );
+
+
+
+        });
+    </script>
+
+
+
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">&nbsp;</div>
+    <div class="row">
+        <div id="queues-accordion">
+
+        </div>
+
+    </div>
+
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="well">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="col-md-12"><h1>Payment Request</h1></div>
+
+                            {% set messages = app.session.getFlashBag.get('message') %}
+                            {% if messages  %}
+                                <div class="alert alert-danger">
+                                    {% for message in messages %}
+                                        {{ message|raw }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="col-md-12">
+                                <div class="col-md-3">
+                                    Total Value
+                                </div>
+                                <div class="col-md-9">
+                                    BTC {{ request.valuebtc }} &nbsp; ({{ request.value }} satoshi)
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">&nbsp;</div>
+
+                            {%  for requirement in requirements %}
+
+                                <div class="col-md-12">
+                                    <div class="media">
+                                        <div class="media-left">
+                                            <a href="#">
+                                                <img class="media-object" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9InllcyI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+PCEtLQpTb3VyY2UgVVJMOiBob2xkZXIuanMvNjR4NjQKQ3JlYXRlZCB3aXRoIEhvbGRlci5qcyAyLjYuMC4KTGVhcm4gbW9yZSBhdCBodHRwOi8vaG9sZGVyanMuY29tCihjKSAyMDEyLTIwMTUgSXZhbiBNYWxvcGluc2t5IC0gaHR0cDovL2ltc2t5LmNvCi0tPjxkZWZzPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+PCFbQ0RBVEFbI2hvbGRlcl8xNTAyNDEyZTJlYyB0ZXh0IHsgZmlsbDojQUFBQUFBO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1mYW1pbHk6QXJpYWwsIEhlbHZldGljYSwgT3BlbiBTYW5zLCBzYW5zLXNlcmlmLCBtb25vc3BhY2U7Zm9udC1zaXplOjEwcHQgfSBdXT48L3N0eWxlPjwvZGVmcz48ZyBpZD0iaG9sZGVyXzE1MDI0MTJlMmVjIj48cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIGZpbGw9IiNFRUVFRUUiLz48Zz48dGV4dCB4PSIxNC41IiB5PSIzNi44Ij42NHg2NDwvdGV4dD48L2c+PC9nPjwvc3ZnPg==" alt="...">
+                                            </a>
+                                        </div>
+                                        <div class="media-body">
+                                            <h4 class="media-heading">Output {{ loop.index }}</h4>
+                                            <div>BTC {{ request.valuebtc }} &nbsp; ({{ request.value }} satoshi)</div>
+                                            <div>Address: {{  requirement.address }}</div>
+                                            <div>Script: {{ requirement.scriptHex }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12">&nbsp;</div>
+
+                            {%  endfor %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <a href="{{ bitcoinUrl }}">
+                                <div id="qrcode" class="pull-right"></div>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

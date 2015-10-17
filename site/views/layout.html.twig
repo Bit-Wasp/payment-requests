@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title '' %}</title>
+
+    <link href="{{ app.request.basepath }}/assets/css/main.css" rel="stylesheet" type="text/css" />
+
+    <!-- Twitter Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ app.request.basepath }}/assets/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ app.request.basepath }}/assets/bootstrap/dist/css/bootstrap-theme.min.css">
+    <!-- jQuery JS -->
+    <script src="{{ app.request.basepath }}/assets/jquery/dist/jquery.min.js"></script>
+    <script src="{{ app.request.basepath }}/assets/jquery-qrcode/jquery.qrcode.min.js"></script>
+    <!-- Twitter Bootstrap JS -->
+    <script src="{{ app.request.basepath }}/assets/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="http://192.168.192.10:81/payment-detector/site/public/assets/bitcore/bitcore.js"></script>
+
+    {% block extrascript '' %}
+</head>
+<body>
+{% block content %}{% endblock %}
+
+</body>
+</html>

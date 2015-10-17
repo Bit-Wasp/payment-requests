@@ -1,0 +1,16 @@
+{
+  "name": "payment-detector",
+  "version": "0.0.0",
+  "authors": [
+    "Thomas Kerin <afk11@users.noreply.github.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "site/assets/",
+    "test",
+    "tests"
+  ]
+}
